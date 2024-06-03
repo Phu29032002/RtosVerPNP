@@ -20,6 +20,7 @@
 #include "main.h"
 #include "cmsis_os.h"
 #include "usb_device.h"
+#include "string.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -420,7 +421,7 @@ void checkpointcambot()
 	  delay_ms(1500);
 //	  SetHomeY();
 //	  delay_ms(500);
-	  MotorY(20,0);
+//	  MotorY(20,0);
 //	  delay_ms(1500);
 }
 
@@ -465,20 +466,6 @@ void listen(char* message)
 void ListenBot(char* message)
 {
 	int startTime = HAL_GetTick();
-//	char *messagebotpass = "cambottomok";
-//	char *messagebotfail = "cambottomundetected";
-//	//int flag = 0;
-//    while(1)
-//    {
-//    	if(strcmp((char*)buffer, messagebotpass) == 0)
-//    	{
-//    		return 1;
-//    	}
-//    	if(strcmp((char*)buffer, messagebotfail) == 0)
-//    	{
-//    	    return 0;
-//    	 }
-//    }
 	clearBuffer(buffer,64);
 	  while (strcmp((char*)buffer, message) != 0)
 	    {
@@ -964,8 +951,7 @@ void TriggerHome(void)
 /* USER CODE END Header_StartMotorZ */
 void StartMotorZ(void const * argument)
 {
-  /* init code for USB_DEVICE */
-  MX_USB_DEVICE_Init();
+
   /* USER CODE BEGIN 5 */
 
   /* Infinite loop */
@@ -1035,7 +1021,16 @@ void StartMotorX(void const * argument)
     SetHomeX();
     delay_ms(500);
    // MotorX(5400,1);//-100
-    convert(54.2,axis_X); //R3 54
+
+    if(home ==1)
+    	    {
+ //  			convert(54.2,axis_X); //R3 54
+    			MotorX(10840,1);
+    	    }
+    	    else if(home == 0)
+    	    {
+    	    	 MotorX(8000,1);
+    	    }
     //delay_ms(1500);
     //convert(54.2,axis_X); //R3 54
     //osThreadSuspend(MotorX);
@@ -1052,10 +1047,19 @@ void StartMotorX(void const * argument)
 /* USER CODE END Header_MainTask */
 void MainTask(void const * argument)
 {
+	//mark1
   /* USER CODE BEGIN MainTask */
+	/* init code for USB_DEVICE */
+	MX_USB_DEVICE_Init();
+	TriggerHome();
+	home = 1;
+	delay_ms(1500);
+	CDC_Transmit_FS(data1, strlen((char *)data1));
+	listen("camtopok");
 	TriggerHome();
 	delay_ms(1500);
-	MotorZ(7400,0);
+	checkpointcambot();
+	//MotorZ(7400,0);
 	delay_ms(1500);
 	SetHomeZ();
 	delay_ms(1500);
